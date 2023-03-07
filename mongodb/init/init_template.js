@@ -5,4 +5,7 @@ db.createUser({
   roles: [{ role: "root", db: "admin" }],
 })
 db.createCollection("user")
-db.createCollection("article")
+db.createCollection("master")
+db.createCollection("swim")
+db.createCollection("goods")
+db.createCollection("training")

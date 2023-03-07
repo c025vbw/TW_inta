@@ -132,49 +132,49 @@ app.put("/Articles", async (req, res) => {//更新 put /*collectionの確認*/
   var userId = req?.body.user
   var articleId = req?.body.article
   const handler = await DBHandler.init()
-  const target = await handler.collection('article').findOne({user: userId, number: articleId})
+  const target = await handler.collection('master').findOne({user: userId, number: articleId})
   var body = req?.body.body
-  if(body == undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{bodies: body}});
+  if(body == undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{bodies: body}});
   switch(target?.types){
     case "swim":
       var genre = req?.body.genre
-      if(genre != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{genres: genre}});
+      if(genre != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{genres: genre}});
       var distance = req?.body.distance
-      if(distance != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{distances: distance}});
+      if(distance != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{distances: distance}});
       var time = req?.body.time
-      if(time != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{times: time}});
+      if(time != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{times: time}});
       var camera = req?.body.camera
-      if(camera != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{cameras: camera}});
+      if(camera != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{cameras: camera}});
       var water = req?.body.water
-      if(water != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{waters: water}});
+      if(water != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{waters: water}});
       var scene = req?.body.scene    
-      if(scene != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{scenes: scene}});
+      if(scene != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{scenes: scene}});
       break;
     case "goods":
       var goggle = req?.body.goggle
-      if(goggle != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{goggles: goggle}});
+      if(goggle != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{goggles: goggle}});
       var kickBoard = req?.body.kickBoard
-      if(kickBoard != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{kickBoards: kickBoard}});
+      if(kickBoard != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{kickBoards: kickBoard}});
       var practiceWear = req?.body.practiceWear
-      if(practiceWear != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{practiceWears: practiceWear}});
+      if(practiceWear != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{practiceWears: practiceWear}});
       var fastWear = req?.body.fastWear
-      if(fastWear != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{fastWears: fastWear}});
+      if(fastWear != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{fastWears: fastWear}});
       var tracksuit = req?.body.tracksuit
-      if(tracksuit != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{tracksuits: tracksuit}});
+      if(tracksuit != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{tracksuits: tracksuit}});
       var pullBuoy = req?.body.pullBuoy
-      if(pullBuoy != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{pullBuoies: pullBuoy}});
+      if(pullBuoy != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{pullBuoies: pullBuoy}});
       var paddle = req?.body.paddle
-      if(paddle != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{paddles: paddle}});
+      if(paddle != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{paddles: paddle}});
       var tube = req?.body.tube
-      if(tube != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{tubes: tube}});
+      if(tube != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{tubes: tube}});
       var medicineBall = req?.body.medicineBall
-      if(medicineBall != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{medicineBalls: medicineBall}});
+      if(medicineBall != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{medicineBalls: medicineBall}});
       var mat = req?.body.mat
-      if(mat != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{mats: mat}});
+      if(mat != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{mats: mat}});
       break;
     case "training":
       var genre = req?.body.genre
-      if(genre != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{genres: genre}});
+      if(genre != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{genres: genre}});
       break;
   }
   res.send(JSON.stringify(true))

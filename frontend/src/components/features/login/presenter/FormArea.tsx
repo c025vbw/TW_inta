@@ -1,5 +1,6 @@
 import { FC } from "react"
 import { FieldErrors, UseFormRegister } from "react-hook-form"
+import { Button } from "../../../ui/button/Button"
 import { Label } from "../../../ui/field/Label"
 import { TextField } from "../../../ui/field/TextField"
 
@@ -25,7 +26,7 @@ export const FormArea:FC<Props> = ({errors, register}) => {
         {errors.password && <span className="font-normal text-red-500 mt-4">エラー</span>}
       </div>
     <div className="w-36 mt-4">
-      <button type="submit">送信</button>
+      <Button color="bg-blue-500" onClick={() => console.log('color')}>送信</Button>
     </div>
     </div>
   )

@@ -18,7 +18,7 @@ app.post("/Articles", async (req, res) => {//投稿 post
   var queryList = req.url.slice(11, req.url.length).split('&')
   var id = queryList[0].split('=')[1]
   var type = queryList[1].split('=')[1]
-  // for(var i = 2; i < queryList.length; i++){
+  // for(var i = 2; i < queryList.length - 1; i++){
   //   var splited = queryList[i].split('=')
   //   switch(type){
   //     case "競泳":
@@ -46,31 +46,45 @@ app.post("/Articles", async (req, res) => {//投稿 post
   //       break;
   //   }
   // }
+  var body = queryList[queryList.length - 1].split('=')[1]
   const handler = await DBHandler.init()
   var data = await handler.collection('user').findOne({user: id}) /*検索し、投稿者のarcicleCountを獲得する*/
   var count = data?.articleCount + 1
   handler.collection('user').updateOne({user: id}, {$set:{articleCount: count}})
-  handler.collection('article').insertOne({user: id, article: count, types: type}) /*投稿する*/
+  handler.collection('article').insertOne({user: id, number: count, types: type, bodies: body}) /*投稿する*/
   res.send(JSON.stringify(true))
 })
 app.put("/Articles", async (req, res) => {//更新
   console.log("update")
   res.send(JSON.stringify("ok"))
 })
-app.get("/Articles", async (req, res) => {//取得 get
+app.put("/Articles", async (req, res) => {//取得 get
   console.log("get")
   const handler = await DBHandler.init()
-  const answer = handler.collection('article').find().toArray() /*検索文にて探す*/
+  var queryList = req.url.slice(11, req.url.length).split('&')
+  var id = ""
+  var type = queryList[0].split('=')[1]
+  for(var i = 1; i < queryList.length; i++){
+    var splited = queryList[i].split('=')
+    switch(splited[0]){
+      case "user": id = splited[1]; break;
+    }
+  }
+  const answer = await handler.collection('article').find({user: {$regex: id}, types: {$regex: type}}).toArray()/*検索文にて探す*/
   res.send(JSON.stringify(answer))
 })
-app.delete("/Articles", async (req, res) => {//削除
-  res.send(JSON.stringify("delate"))
+app.delete("/Articles", async (req, res) => {//削除 delete
+  console.log("delate")
   var queryList = req.url.slice(11, req.url.length).split('&')
   var userId = queryList[0].split('=')[1]
-  var articleId = queryList[1].split('=')[1]
+  var articleId = Number(queryList[1].split('=')[1])
   const handler = await DBHandler.init()
-  handler.collection('article').deleteOne({user: userId, article: articleId})
-  res.send(JSON.stringify(true))
+  var debug = await handler.collection('article').find({user: userId, number: articleId}).count()
+  if(debug != 1) res.send(JSON.stringify(false))
+  else{
+    await handler.collection('article').deleteOne({user: userId, number: articleId})
+    res.send(JSON.stringify(true))
+  }
 })
 app.post("/User", async (req, res) => {//新規登録 post
   console.log("register")
@@ -83,7 +97,7 @@ app.post("/User", async (req, res) => {//新規登録 post
   if(flag) await handler.collection('user').insertOne({user: id, pwd: pass, articleCount: 0})
   res.send(JSON.stringify(flag))
 })
-app.put("/User", async (req, res) => {//ログイン put
+app.get("/User", async (req, res) => {//ログイン put
   console.log("login")
   var queryList = req.url.slice(7, req.url.length).split('&')
   var id = queryList[0].split('=')[1]

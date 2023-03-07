@@ -149,6 +149,8 @@ app.put("/Articles", async (req, res) => {//更新 put /*collectionの確認*/
       if(water != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{waters: water}});
       var scene = req?.body.scene    
       if(scene != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{scenes: scene}});
+      var recourse = req?.body.recourse
+      if(recourse != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{recourses: recourse}});
       break;
     case "goods":
       var goggle = req?.body.goggle
@@ -171,12 +173,17 @@ app.put("/Articles", async (req, res) => {//更新 put /*collectionの確認*/
       if(medicineBall != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{medicineBalls: medicineBall}});
       var mat = req?.body.mat
       if(mat != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{mats: mat}});
+      var recourse = req?.body.recourse
+      if(recourse != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{recourses: recourse}});
       break;
     case "training":
       var genre = req?.body.genre
       if(genre != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{genres: genre}});
+      var recourse = req?.body.recourse
+      if(recourse != undefined) handler.collection(target?.type).updateOne({user: userId, number: articleId}, {$set:{recourses: recourse}});
       break;
   }
+  
   res.send(JSON.stringify(true))
 })
 app.get("/Article/swim", async (req, res) => {//取得 get

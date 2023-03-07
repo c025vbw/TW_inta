@@ -13,108 +13,96 @@ app.use((req, res, next) => {
 app.listen(80, () => {
   console.log("Start on port 80.")
 })
-app.get("/Articles", async (req, res) => {//投稿 post
+app.post("/Articles", async (req, res) => {//投稿 post
   console.log("new")
-  var queryList = req.url.slice(11, req.url.length).split('&')
-  var id = queryList[0].split('=')[1]
-  var type = queryList[1].split('=')[1]
-  var body
-  var send = [null, null, null, null, null, null, null, null, null, null, ""]
-  for(var i = 2; i < queryList.length; i++){
-    var splited = queryList[i].split('=')
-    switch(type){
-      case "swim":
-        switch(splited[0]){
-          case "genre": send[0] = splited[1]; break;//練習か大会
-          case "distance": send[1] = splited[1]; break;//距離　dictance=500-100-250-200-1050
-          case "time": send[2] = splited[1]; break;//タイム  time=100-20-50-40-210
-          case "camera": send[3] = splited[1]; break;//定点　持っているのか
-          case "water": send[4] = splited[1]; break;//水中か水上か
-          case "scene": send[5] = splited[1]; break;//飛び込みなのか、再チュなのか、ターン
-        }
-        break;
-      case "goods":
-        switch(splited[0]){
-          case "goggle": send[0] = splited[1]; break;
-          case "kickBoard": send[1] = splited[1]; break;
-          case "practiceWear": send[2] = splited[1]; break;
-          case "fastWear": send[3] = splited[1]; break;
-          case "tracksuit": send[4] = splited[1]; break;
-          case "pullBuoy": send[5] = splited[1]; break;
-          case "paddle": send[6] = splited[1]; break;
-          case "tube": send[7] = splited[1]; break;
-          case "medicineBall": send[8] = splited[1]; break;
-          case "mat": send[9] = splited[1]; break;
-
-        }
-        break;
-      case "training":
-        switch(splited[0]){
-          case "genre": send[0] = splited[1]; break;
-        }
-        break;
-    }
-    if(splited[0] = 'body') body = queryList[queryList.length - 1].split('=')[1]
-  }
   const handler = await DBHandler.init()
-  var data = await handler.collection('user').findOne({user: id}) /*検索し、投稿者のarcicleCountを獲得する*/
+  var data = await handler.collection('user').findOne({user: id})
   var count = data?.articleCount + 1
   handler.collection('user').updateOne({user: id}, {$set:{articleCount: count}})
+  var id = req?.body.user
+  var type = req?.body.type
+  var body = req?.body.body
   switch(type){
-    case "swim": handler.collection('article').insertOne({user: id, number: count, types: type, genres: send[0], distances: send[1], times: send[2], cameras: send[3], waters: send[4], scenes: send[5], bodies: body}); break;
-    case "goods": handler.collection('article').insertOne({user: id, number: count, types: type, goggles: send[0], kickBoards: send[1], practiceWears: send[2], fastWears: send[3], tracksuits: send[4], pulllBuoies: send[5], paddles: send[6], tubes: send[7], medicineBalls: send[8], mats: send[9], bodies: body}); break;
-    case "training": handler.collection('article').insertOne({user: id, number: count, types: type, genres: send[0], bodies: body}); break;
+    case "swim":
+      var genre = req?.body.genre
+      var distance = req?.body.distance
+      var time = req?.body.time
+      var camera = req?.body.camera
+      var water = req?.body.water
+      var scene = req?.body.scene
+      //ない場合の処理
+      handler.collection('article').insertOne({user: id, number: count, types: type, genres: genre, distances: distance, times: time, cameras: camera, waters: water, scenes: scene, bodies: body});
+      break;
+    case "goods":
+      var goggle = req?.body.goggle
+      var kickBoard = req?.body.kickBoard
+      var practiceWear = req?.body.practiceWear
+      var fastWear = req?.body.fastWear
+      var tracksuit = req?.body.tracksuit
+      var pullBuoy = req?.body.pullBuoy
+      var paddle = req?.body.paddle
+      var tube = req?.body.tube
+      var medicineBall = req?.body.medicineBall
+      var mat = req?.body.mat
+      //ない場合の処理
+      handler.collection('article').insertOne({user: id, number: count, types: type, goggles: goggle, kickBoards: kickBoard, practiceWears: practiceWear, fastWears: fastWear, tracksuits: tracksuit, pulllBuoies: pullBuoy, paddles: paddle, tubes: tube, medicineBalls: medicineBall, mats: mat, bodies: body});
+      break;
+    case "training":
+      genre = req?.body.genre
+      //ない場合の処理
+      handler.collection('article').insertOne({user: id, number: count, types: type, genres: genre, bodies: body});
+      break;
   }
   res.send(JSON.stringify(true))
 })
 app.put("/Articles", async (req, res) => {//更新 put
   console.log("update")
-  var queryList = req.url.slice(11, req.url.length).split('&')
-  var userId = queryList[0].split('=')[1]
-  var articleId = Number(queryList[1].split('=')[1])
+  var userId = req?.body.user
+  var articleId = req?.body.article
   const handler = await DBHandler.init()
   const target = await handler.collection('article').findOne({user: userId, number: articleId})
+  var body = req?.body.body
+  if(body == undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{bodies: body}});
   switch(target?.types){
     case "swim":
-      for(var i = 2; i < queryList.length; i++){
-        var splited = queryList[i].split('=')
-        switch(splited[0]){
-          case "genre": ; handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{genres: splited[1]}}); break;
-          case "distance": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{distances: splited[1]}}); break;
-          case "time": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{times: splited[1]}}); break;
-          case "camera": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{cameras: splited[1]}}); break;
-          case "water": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{waters: splited[1]}}); break;
-          case "scene": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{scenes: splited[1]}}); break;
-          case "body": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{bodies: splited[1]}}); break;
-        }
-      }
+      var genre = req?.body.genre
+      if(genre != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{genres: genre}});
+      var distance = req?.body.distance
+      if(distance != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{distances: distance}});
+      var time = req?.body.time
+      if(time != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{times: time}});
+      var camera = req?.body.camera
+      if(camera != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{cameras: camera}});
+      var water = req?.body.water
+      if(water != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{waters: water}});
+      var scene = req?.body.scene    
+      if(scene != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{scenes: scene}});
       break;
     case "goods":
-      for(var i = 2; i < queryList.length; i++){
-        var splited = queryList[i].split('=')
-        switch(splited[0]){
-          case "goggle": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{goggles: splited[1]}}); break;
-          case "kickBoard": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{kickBoards: splited[1]}}); break;
-          case "practiceWear": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{practiceWears: splited[1]}}); break;
-          case "fastWear": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{fastWears: splited[1]}}); break;
-          case "tracksuit": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{tracksuits: splited[1]}}); break;
-          case "pullBuoy": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{pullBuoies: splited[1]}}); break;
-          case "paddle": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{paddles: splited[1]}}); break;
-          case "tube": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{tubes: splited[1]}}); break;
-          case "medicineBall": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{medicineBalls: splited[1]}}); break;
-          case "mat": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{mats: splited[1]}}); break;
-          case "body": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{bodies: splited[1]}}); break;
-        }
-      }
+      var goggle = req?.body.goggle
+      if(goggle != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{goggles: goggle}});
+      var kickBoard = req?.body.kickBoard
+      if(kickBoard != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{kickBoards: kickBoard}});
+      var practiceWear = req?.body.practiceWear
+      if(practiceWear != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{practiceWears: practiceWear}});
+      var fastWear = req?.body.fastWear
+      if(fastWear != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{fastWears: fastWear}});
+      var tracksuit = req?.body.tracksuit
+      if(tracksuit != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{tracksuits: tracksuit}});
+      var pullBuoy = req?.body.pullBuoy
+      if(pullBuoy != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{pullBuoies: pullBuoy}});
+      var paddle = req?.body.paddle
+      if(paddle != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{paddles: paddle}});
+      var tube = req?.body.tube
+      if(tube != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{tubes: tube}});
+      var medicineBall = req?.body.medicineBall
+      if(medicineBall != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{medicineBalls: medicineBall}});
+      var mat = req?.body.mat
+      if(mat != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{mats: mat}});
       break;
     case "training":
-      for(var i = 2; i < queryList.length; i++){
-        var splited = queryList[i].split('=')
-        switch(splited[0]){
-          case "genre": ; handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{genres: splited[1]}}); break;
-          case "body": handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{bodies: splited[1]}}); break;
-        }
-      }
+      var genre = req?.body.genre
+      if(genre != undefined) handler.collection('article').updateOne({user: userId, number: articleId}, {$set:{genres: genre}});
       break;
   }
   res.send(JSON.stringify(true))
@@ -122,25 +110,63 @@ app.put("/Articles", async (req, res) => {//更新 put
 app.get("/Articles", async (req, res) => {//取得 get
   console.log("search")
   const handler = await DBHandler.init()
-  var queryList = req.url.slice(11, req.url.length).split('&')
-  var id = ""
-  var distance = ""
-  var type = queryList[0].split('=')[1]
-  // for(var i = 1; i < queryList.length; i++){
-  //   var splited = queryList[i].split('=')
-  //   switch(splited[0]){
-  //     case "user": id = splited[1]; break;
-  //     case "genre": genre = splited[1]; break;
-  //   }
-  // }
-  const answer = await handler.collection('article').find({user: {$regex: id}, types: {$regex: type}, distances: {$regex: distance}}).toArray()
+  var id = req?.query.user
+  if(id == undefined) id = ""
+  var type = req?.query.type
+  if(type == undefined) type = ""
+  var answer
+  switch(type){
+    case 'swim':
+      var genre = req?.body.genre
+      if(genre == undefined) genre = ""
+      var distance = req?.body.distance
+      if(distance == undefined) distance = ""
+      var time = req?.body.time
+      if(time == undefined) time = ""
+      var camera = req?.body.camera
+      if(camera == undefined) camera = ""
+      var water = req?.body.water
+      if(water == undefined) water = ""
+      var scene = req?.body.scene    
+      if(scene == undefined) scene = ""
+      answer = await handler.collection('article').find({user: {$regex: id}, types: {$regex: type}, genres: {$regex: genre}, distances: {$regex: distance}, times: {$regex: time}, cameras: {$regex: camera}, waters: {$regix: water}, scenes: {$regix: scene}}).toArray()
+      break;
+    case 'goods':
+      var goggle = req?.body.goggle
+      if(goggle == undefined) goggle = ""
+      var kickBoard = req?.body.kickBoard
+      if(kickBoard == undefined) kickBoard = ""
+      var practiceWear = req?.body.practiceWear
+      if(practiceWear == undefined) practiceWear = ""
+      var fastWear = req?.body.fastWear
+      if(fastWear == undefined) fastWear = ""
+      var tracksuit = req?.body.tracksuit
+      if(tracksuit == undefined) tracksuit = ""
+      var pullBuoy = req?.body.pullBuoy
+      if(pullBuoy == undefined) pullBuoy = ""
+      var paddle = req?.body.paddle
+      if(paddle == undefined) paddle = ""
+      var tube = req?.body.tube
+      if(tube == undefined) tube = ""
+      var medicineBall = req?.body.medicineBall
+      if(medicineBall == undefined) medicineBall = ""
+      var mat = req?.body.mat
+      if(mat == undefined) mat = ""
+      answer = await handler.collection('article').find({user: {$regex: id}, types: {$regex: type}, goggles: {$regex: goggle}, kickBoards: {$regex: kickBoard}, practiceWears: {$regex: practiceWear}, fastWears: {$regex: fastWear}, tracksuits: {$regex: tracksuit}, pullBuoies: {$regex: pullBuoy}, paddles: {$regex: paddle}, tubes: {$regex: tube}, medicineBalls: {$regex: medicineBall}, mats: {$regex: mat}}).toArray()
+      break;
+    case 'training':
+      var genre = req?.body.genre
+      if(genre == undefined) genre = ""
+      answer = await handler.collection('article').find({user: {$regex: id}, types: {$regex: type}, genres: {$regex: genre}}).toArray()
+      break;
+      
+  }
   res.send(JSON.stringify(answer))
 })
 app.delete("/Articles", async (req, res) => {//削除 delete
   console.log("delate")
-  var queryList = req.url.slice(11, req.url.length).split('&')
-  var userId = queryList[0].split('=')[1]
-  var articleId = Number(queryList[1].split('=')[1])
+  var userId = req?.query.user
+  var articleId =  req?.query.article
   const handler = await DBHandler.init()
   var debug = await handler.collection('article').find({user: userId, number: articleId}).count()
   if(debug != 1) res.send(JSON.stringify(false))
@@ -151,9 +177,8 @@ app.delete("/Articles", async (req, res) => {//削除 delete
 })
 app.post("/User", async (req, res) => {//新規登録 post
   console.log("register")
-  var queryList = req.url.slice(7, req.url.length).split('&')
-  var id = req?.query.id
-  var pass = req?.query.pass
+  var id = req?.body.id
+  var pass = req?.body.pass
   const handler = await DBHandler.init()
   const findResult = await handler.collection('user').find({user: id}).count()
   var flag = (findResult == 0)
@@ -162,9 +187,8 @@ app.post("/User", async (req, res) => {//新規登録 post
 })
 app.put("/User", async (req, res) => {//ログイン put
   console.log("login")
-  var queryList = req.url.slice(7, req.url.length).split('&')
-  var id = req.query.id
-  var pass = req.query.pass
+  var id = req?.body.id
+  var pass = req?.body.pass
   const handler = await DBHandler.init()
   const findResult = await handler.collection('user').find({user: id, pwd: pass}).count()
   var flag = (findResult == 1)

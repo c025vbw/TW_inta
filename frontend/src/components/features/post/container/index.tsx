@@ -1,4 +1,5 @@
 import { SearchButton } from "../../../ui/button/SearchButton"
+<<<<<<< HEAD
 import { PresenterContainer } from "../presenter/PresenterContainer"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { FormArea } from "../presenter/FormArea"
@@ -42,5 +43,14 @@ export const PostContainer = () => {
                 <FormArea errors={errors} register={register} />
             </form>
         </PresenterContainer>
+=======
+
+export const PostContainer = () => {
+    //ロジック apiで呼び出し
+    return (
+        //presenter コンポーネン
+        <SearchButton onClick={() => console.log("Button clicked!")}>
+        </SearchButton>
+>>>>>>> b2a6bdc0fc4bcbff3cfb388eda5d3219e92c24f7
     )
 }

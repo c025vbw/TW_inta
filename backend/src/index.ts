@@ -13,24 +13,24 @@ app.use((req, res, next) => {
 app.listen(80, () => {
   console.log("Start on port 80.")
 })
-app.post("/Articles", async (req, res) => {//投稿 post
+app.get("/Articles", async (req, res) => {//投稿 post
   console.log("new")
   var queryList = req.url.slice(11, req.url.length).split('&')
   var id = queryList[0].split('=')[1]
   var type = queryList[1].split('=')[1]
   var body
-  var send = []
+  var send = [null, null, null, null, null, null, null, null, null, null, ""]
   for(var i = 2; i < queryList.length; i++){
     var splited = queryList[i].split('=')
     switch(type){
       case "swim":
         switch(splited[0]){
-          case "genre": send[0] = splited[1]; break;
-          case "distance": send[1] = splited[1]; break;
-          case "time": send[2] = splited[1]; break;
-          case "camera": send[3] = splited[1]; break;
-          case "water": send[4] = splited[1]; break;
-          case "scene": send[5] = splited[1]; break;
+          case "genre": send[0] = splited[1]; break;//練習か大会
+          case "distance": send[1] = splited[1]; break;//距離　dictance=500-100-250-200-1050
+          case "time": send[2] = splited[1]; break;//タイム  time=100-20-50-40-210
+          case "camera": send[3] = splited[1]; break;//定点　持っているのか
+          case "water": send[4] = splited[1]; break;//水中か水上か
+          case "scene": send[5] = splited[1]; break;//飛び込みなのか、再チュなのか、ターン
         }
         break;
       case "goods":
@@ -119,19 +119,21 @@ app.put("/Articles", async (req, res) => {//更新 put
   }
   res.send(JSON.stringify(true))
 })
-app.put("/Articles", async (req, res) => {//取得 get
-  console.log("get")
+app.get("/Articles", async (req, res) => {//取得 get
+  console.log("search")
   const handler = await DBHandler.init()
   var queryList = req.url.slice(11, req.url.length).split('&')
   var id = ""
+  var distance = ""
   var type = queryList[0].split('=')[1]
-  for(var i = 1; i < queryList.length; i++){
-    var splited = queryList[i].split('=')
-    switch(splited[0]){
-      case "user": id = splited[1]; break;
-    }
-  }
-  const answer = await handler.collection('article').find({user: {$regex: id}, types: {$regex: type}}).toArray()
+  // for(var i = 1; i < queryList.length; i++){
+  //   var splited = queryList[i].split('=')
+  //   switch(splited[0]){
+  //     case "user": id = splited[1]; break;
+  //     case "genre": genre = splited[1]; break;
+  //   }
+  // }
+  const answer = await handler.collection('article').find({user: {$regex: id}, types: {$regex: type}, distances: {$regex: distance}}).toArray()
   res.send(JSON.stringify(answer))
 })
 app.delete("/Articles", async (req, res) => {//削除 delete
@@ -150,19 +152,19 @@ app.delete("/Articles", async (req, res) => {//削除 delete
 app.post("/User", async (req, res) => {//新規登録 post
   console.log("register")
   var queryList = req.url.slice(7, req.url.length).split('&')
-  var id = queryList[0].split('=')[1]
-  var pass = queryList[1].split('=')[1]
+  var id = req?.query.id
+  var pass = req?.query.pass
   const handler = await DBHandler.init()
   const findResult = await handler.collection('user').find({user: id}).count()
   var flag = (findResult == 0)
   if(flag) await handler.collection('user').insertOne({user: id, pwd: pass, articleCount: 0})
   res.send(JSON.stringify(flag))
 })
-app.get("/User", async (req, res) => {//ログイン put
+app.put("/User", async (req, res) => {//ログイン put
   console.log("login")
   var queryList = req.url.slice(7, req.url.length).split('&')
-  var id = queryList[0].split('=')[1]
-  var pass = queryList[1].split('=')[1]
+  var id = req.query.id
+  var pass = req.query.pass
   const handler = await DBHandler.init()
   const findResult = await handler.collection('user').find({user: id, pwd: pass}).count()
   var flag = (findResult == 1)
